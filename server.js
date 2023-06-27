@@ -5,7 +5,7 @@ const cors = require('cors');
 const PORT = 3001;
 const fetch = require('node-fetch');
 
-app.use(cors({ origin: 'http://localhost:3000' || 'https://culinary-hub.onrender.com', credentials: true }))
+app.use(cors({ origin: 'https://culinary-hub.onrender.com', credentials: true }))
 
 // Import the necessary dependencies for interacting with the database
 const db = require('./db/db');
