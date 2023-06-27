@@ -1,23 +1,23 @@
-const express = require('express')
+const express = require('express');
 const session = require('express-session');
-const app = express()
-const cors = require('cors')
-const PORT = 3001
-const fetch = require('node-fetch')
+const app = express();
+const cors = require('cors');
+const PORT = 3001;
+const fetch = require('node-fetch');
 
-app.use(cors())
+app.use(cors());
 
 // Import the necessary dependencies for interacting with the database
-const db = require('./db/db')
-const bcrypt = require('bcrypt')
+const db = require('./db/db');
+const bcrypt = require('bcrypt');
 
-app.listen(PORT, () => console.log(`Server is listening here: http://localhost:${PORT}`))
+app.listen(PORT, () => console.log(`Server is listening here: http://localhost:${PORT}`));
 
-app.use(express.json())
+app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('Welcome to the server')
-})
+    res.send('Welcome to the server');
+});
 
 app.use(
     session({
@@ -30,45 +30,53 @@ app.use(
 );
 
 function logger(req, res, next) {
-    console.log(`${new Date()} ${req.method} ${req.path}`)
+    console.log(`${new Date()} ${req.method} ${req.path}`);
 
     // next() calls the next function in middleware to run
-    next()
+    next();
 }
 
-app.use(logger)
+app.use(logger);
+
+// Check if the user is logged in
+app.get('/api/check-login', (req, res) => {
+    console.log('req.session.user:', req.session.user);
+    if (req.session.user) {
+        // User is logged in
+        res.status(200).json({ loggedIn: true, user: req.session.user });
+    } else {
+        // User is not logged in
+        res.status(200).json({ loggedIn: false });
+    }
+});
+
 // Handle user registration
 app.post('/api/signup', async (req, res) => {
-    // Check if the itemName is null or empty
-    if (!itemName) {
-        console.error('Item name cannot be empty');
-        return;
-    }
     try {
-        const { name, email, password } = req.body
+        const { name, email, password } = req.body;
 
         // Check if the user already exists
-        const userExists = await db.query('SELECT * FROM users WHERE email = $1', [email])
+        const userExists = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         if (userExists.rows.length > 0) {
-            return res.status(400).json({ message: 'User already exists' })
+            return res.status(400).json({ message: 'User already exists' });
         }
 
         // Hash the password
-        const saltRounds = 10
-        const passwordDigest = await bcrypt.hash(password, saltRounds)
+        const saltRounds = 10;
+        const passwordDigest = await bcrypt.hash(password, saltRounds);
 
         // Insert the user profile into the database
         const newUser = await db.query(
             'INSERT INTO users (name, email, password_digest) VALUES ($1, $2, $3) RETURNING *',
             [name, email, passwordDigest]
-        )
+        );
 
-        res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] })
+        res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] });
     } catch (error) {
-        console.error('Error occurred during user registration:', error)
-        res.status(500).json({ message: 'Internal server error' })
+        console.error('Error occurred during user registration:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-})
+});
 
 // Handle user login
 app.post('/api/login', async (req, res) => {
@@ -91,21 +99,26 @@ app.post('/api/login', async (req, res) => {
         req.session.user = {
             id: user.rows[0].id,
             name: user.rows[0].name,
-            email: user.rows[0].email,
+            email: user.rows[0].email
         };
 
-        // Login successful
-        console.log('User logged in:', user.rows[0].name);
         res.status(200).json({ message: 'Login successful', user: req.session.user });
     } catch (error) {
-        console.error('Error occurred during login:', error);
+        console.error('Error occurred during user login:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
 
+// Handle user logout
+app.post('/api/logout', (req, res) => {
+    req.session.destroy();
+    res.status(200).json({ message: 'Logout successful' });
+});
+
+
 //Check if the user is logged in
 app.get('/api/check-login', (req, res) => {
-    console.log('req.session.user:', req.session.user);
+    console.log('Session:', req.session);
     if (req.session.user) {
         // User is logged in
         res.status(200).json({ loggedIn: true, user: req.session.user });
@@ -114,6 +127,7 @@ app.get('/api/check-login', (req, res) => {
         res.status(200).json({ loggedIn: false });
     }
 });
+
 
 
 //Logging the user out 
@@ -267,7 +281,7 @@ app.post('/api/lists/:listId/items', async (req, res) => {
 
 const isAuthenticated = (req, res, next) => {
     // Check if the user is authenticated
-    if (req.session.user) {
+    if (req.session.user && req.session.user.id) {
         next(); // User is authenticated, proceed to the next middleware or route handler
     } else {
         res.status(401).json({ message: 'Unauthorized' }); // User is not authenticated, return unauthorized status
