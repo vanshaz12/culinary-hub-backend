@@ -33,9 +33,18 @@ app.use(
         secret: 'jvdjsvcjvcjsvcmhscmfg3i7g',
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: 1000 * 60 * 60 * 24 }
+        cookie: { secure: false },
     })
 );
+
+// Middleware to check if the user is authenticated
+const isAuthenticated = (req, res, next) => {
+    if (req.session.user) {
+        next(); // User is authenticated, proceed to the next middleware or route handler
+    } else {
+        res.status(401).json({ error: 'Unauthorized' }); // User is not authenticated
+    }
+};
 
 function logger(req, res, next) {
     console.log(`${new Date()} ${req.method} ${req.path}`);
@@ -45,18 +54,6 @@ function logger(req, res, next) {
 }
 
 app.use(logger);
-
-// Check if the user is logged in
-app.get('/api/check-login', (req, res) => {
-    console.log('req.session.user:', req.session.user);
-    if (req.session.user) {
-        // User is logged in
-        res.status(200).json({ loggedIn: true, user: req.session.user });
-    } else {
-        // User is not logged in
-        res.status(200).json({ loggedIn: false });
-    }
-});
 
 // Handle user registration
 app.post('/api/signup', async (req, res) => {
@@ -78,6 +75,13 @@ app.post('/api/signup', async (req, res) => {
             'INSERT INTO users (name, email, password_digest) VALUES ($1, $2, $3) RETURNING *',
             [name, email, passwordDigest]
         );
+
+        req.session.user = {
+            id: newUser.rows[0].id,
+            name: newUser.rows[0].name,
+            email: newUser.rows[0].email,
+        };
+        console.log(req.session)
 
         res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] });
     } catch (error) {
@@ -103,26 +107,18 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Set the session data
         req.session.user = {
             id: user.rows[0].id,
             name: user.rows[0].name,
-            email: user.rows[0].email
+            email: user.rows[0].email,
         };
-
+        console.log(req.session)
         res.status(200).json({ message: 'Login successful', user: req.session.user });
     } catch (error) {
         console.error('Error occurred during user login:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
-// Handle user logout
-app.post('/api/logout', (req, res) => {
-    req.session.destroy();
-    res.status(200).json({ message: 'Logout successful' });
-});
-
 
 //Check if the user is logged in
 app.get('/api/check-login', (req, res) => {
@@ -137,10 +133,7 @@ app.get('/api/check-login', (req, res) => {
 });
 
 
-
-//Logging the user out 
-// User logout
-app.get('/api/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
     // Clear the session data
     req.session.destroy((err) => {
         if (err) {
@@ -258,14 +251,7 @@ app.get('/api/random-recipe', async (req, res) => {
     }
 });
 
-// Middleware to check if the user is authenticated
-const isAuthenticated = (req, res, next) => {
-    if (req.session.user) {
-        next(); // User is authenticated, proceed to the next middleware or route handler
-    } else {
-        res.status(401).json({ error: 'Unauthorized' }); // User is not authenticated
-    }
-};
+
 
 // Handle creating a new list item
 app.post('/api/lists/:listId/items', isAuthenticated, async (req, res) => {
