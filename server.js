@@ -5,7 +5,7 @@ const cors = require('cors');
 const PORT = 3001;
 const fetch = require('node-fetch');
 
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }))
 
 // Import the necessary dependencies for interacting with the database
 const db = require('./db/db');
@@ -147,7 +147,7 @@ app.get('/api/logout', (req, res) => {
 });
 
 
-const API_KEY = 'bdcfcfd9559641359e2535faefbfa73d'
+const API_KEY = '65493f96d9814a4e82ae17cfc6f9fdf5'
 
 
 app.get('/api/search-recipes', async (req, res) => {
@@ -250,15 +250,20 @@ app.get('/api/random-recipe', async (req, res) => {
     }
 });
 
-app.post('/api/lists/:listId/items', async (req, res) => {
+// Middleware to check if the user is authenticated
+const isAuthenticated = (req, res, next) => {
+    if (req.session.user) {
+        next(); // User is authenticated, proceed to the next middleware or route handler
+    } else {
+        res.status(401).json({ error: 'Unauthorized' }); // User is not authenticated
+    }
+};
+
+// Handle creating a new list item
+app.post('/api/lists/:listId/items', isAuthenticated, async (req, res) => {
     try {
         const { listId } = req.params;
         const { name } = req.body;
-
-        // Check if the user is authenticated and the session is set
-        if (!req.session.user || !req.session.user.id) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
 
         // Verify that the user has the necessary permissions to create items in the list
         const listQuery = 'SELECT * FROM lists WHERE id = $1 AND user_id = $2';
@@ -279,39 +284,11 @@ app.post('/api/lists/:listId/items', async (req, res) => {
     }
 });
 
-const isAuthenticated = (req, res, next) => {
-    // Check if the user is authenticated
-    if (req.session.user && req.session.user.id) {
-        next(); // User is authenticated, proceed to the next middleware or route handler
-    } else {
-        res.status(401).json({ message: 'Unauthorized' }); // User is not authenticated, return unauthorized status
-    }
-};
-
-app.post('/api/lists', isAuthenticated, async (req, res) => {
-    try {
-        const { name } = req.body;
-        const userId = req.session.user.id;
-
-        const newList = await db.query(
-            'INSERT INTO lists (name, user_id) VALUES ($1, $2) RETURNING *',
-            [name, userId]
-        );
-
-        res.status(201).json(newList.rows[0]);
-    } catch (error) {
-        console.error('Error occurred while creating a list item:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-
-
 // Fetch all lists
-app.get('/api/lists', async (req, res) => {
+app.get('/api/lists', isAuthenticated, async (req, res) => {
     try {
         // Retrieve all lists from the database
-        const lists = await db.query('SELECT * FROM lists');
+        const lists = await db.query('SELECT * FROM lists WHERE user_id = $1', [req.session.user.id]);
 
         res.status(200).json(lists.rows);
     } catch (error) {
@@ -321,12 +298,12 @@ app.get('/api/lists', async (req, res) => {
 });
 
 // Fetch a specific list by ID
-app.get('/api/lists/:id', async (req, res) => {
+app.get('/api/lists/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Retrieve the list from the database based on the provided ID
-        const list = await db.query('SELECT * FROM lists WHERE id = $1', [id]);
+        // Retrieve the list from the database based on the provided ID and user ID
+        const list = await db.query('SELECT * FROM lists WHERE id = $1 AND user_id = $2', [id, req.session.user.id]);
 
         if (list.rows.length === 0) {
             return res.status(404).json({ error: 'List not found' });
@@ -344,45 +321,51 @@ app.put('/api/lists/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const { name } = req.body;
-        const userId = req.session.user.id;
 
-        const updatedList = await db.query(
-            'UPDATE lists SET name = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
-            [name, id, userId]
-        );
+        const updatedList = await db.query('UPDATE lists SET name = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [
+            name,
+            id,
+            req.session.user.id,
+        ]);
 
         if (updatedList.rows.length === 0) {
-            return res.status(404).json({ message: 'List item not found or unauthorized' });
+            return res.status(404).json({ error: 'List not found' });
         }
 
         res.status(200).json(updatedList.rows[0]);
     } catch (error) {
-        console.error('Error occurred while updating a list item:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error updating list item:', error);
+        res.status(500).json({ error: 'An error occurred while updating the list item' });
     }
 });
-
 
 // Handle deleting a list item
 app.delete('/api/lists/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.session.user.id;
 
-        const deletedList = await db.query(
-            'DELETE FROM lists WHERE id = $1 AND user_id = $2 RETURNING *',
-            [id, userId]
-        );
+        const deletedList = await db.query('DELETE FROM lists WHERE id = $1 AND user_id = $2 RETURNING *', [
+            id,
+            req.session.user.id,
+        ]);
 
         if (deletedList.rows.length === 0) {
-            return res.status(404).json({ message: 'List item not found or unauthorized' });
+            return res.status(404).json({ error: 'List not found' });
         }
 
-        res.status(200).json({ message: 'List item deleted successfully' });
+        res.sendStatus(204);
     } catch (error) {
-        console.error('Error occurred while deleting a list item:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error deleting list item:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the list item' });
     }
 });
 
 
+if (process.env.NODE_ENV === 'production') {
+    const path = require('path')
+    app.use(express.static(path.join(__dirname, 'build')));
+
+    app.get('/*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    });
+}
