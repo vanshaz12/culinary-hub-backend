@@ -6,29 +6,28 @@ const db = require('../db/db');
 
 // Create a new list
 router.post('/lists', async (req, res) => {
-    app.post('/api/lists', async (req, res) => {
-        try {
-            const { name } = req.body;
-            console.log('List name:', name); // Debug statement
+    try {
+        const { name } = req.body;
+        console.log('List name:', name); // Debug statement
 
-            if (!req.session.user || !req.session.user.id || !req.session.user.name) {
-                return res.status(401).json({ error: 'User not authenticated' });
-            }
-
-            const id = req.session.user.id;
-
-            // Insert the new list into the database with the user ID and name
-            const listQuery = 'INSERT INTO lists (name, user_id) VALUES ($1, $2) RETURNING *';
-            console.log('SQL query:', listQuery); // Debug statement
-            const newListResult = await db.query(listQuery, [name, id]);
-            console.log('New list created:', newListResult.rows[0]); // Debug statement
-            res.status(201).json(newListResult.rows[0]);
-        } catch (error) {
-            console.error('Error occurred while creating a list:', error);
-            res.status(500).json({ error: 'An error occurred while creating the list' });
+        if (!req.session.user || !req.session.user.id || !req.session.user.name) {
+            return res.status(401).json({ error: 'User not authenticated' });
         }
-    });
+
+        const id = req.session.user.id;
+
+        // Insert the new list into the database with the user ID and name
+        const listQuery = 'INSERT INTO lists (name, user_id) VALUES ($1, $2) RETURNING *';
+        console.log('SQL query:', listQuery); // Debug statement
+        const newListResult = await db.query(listQuery, [name, id]);
+        console.log('New list created:', newListResult.rows[0]); // Debug statement
+        res.status(201).json(newListResult.rows[0]);
+    } catch (error) {
+        console.error('Error occurred while creating a list:', error);
+        res.status(500).json({ error: 'An error occurred while creating the list' });
+    }
 });
+
 
 // Fetch all lists created by the user
 router.get('/lists', async (req, res) => {
