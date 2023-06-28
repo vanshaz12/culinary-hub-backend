@@ -1,22 +1,22 @@
 CREATE DATABASE culinary_hub;
 
 -- Create the "users" table to store user information
-CREATE TABLE users (
+CREATE TABLE users(
   id SERIAL PRIMARY KEY,
-  username VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL
+  name TEXT,
+  email TEXT,
+  password_digest TEXT
 );
-
 -- Create the "lists" table to store user-created lists
 CREATE TABLE lists (
   id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  user_id INT,
+  name VARCHAR(255),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
 
 -- Create the "recipes" table to store recipe information
 CREATE TABLE recipes (
