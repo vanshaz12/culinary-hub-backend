@@ -1,70 +1,49 @@
-# Getting Started with Create React App
+# Culinary Hub 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome to the Culinary Hub, your ultimate companion for all things food and recipes! Our app harnesses the power of the Spoonacular API, providing you with a vast collection of delectable recipes at your fingertips.
 
-## Available Scripts
+## :computer: [Click here](https://culinary-hub-2.onrender.com) to see the live project!
 
-In the project directory, you can run:
+## :page_facing_up: About
 
-### `npm start`
+Culinary Hub is here to make your culinary journey exciting and effortless. With a few taps, you can discover a world of culinary delights, from classic dishes to innovative creations. We'll present you with a curated list of recipes that match your criteria, complete with detailed instructions, ingredient lists, and even nutritional information. The Culinary Hub also allows you to personalize your experience by creating multiple lists. You can easily organize your favorite recipes, create themed lists for special occasions or dietary needs, and save them for future reference.  Each user has exclusive access to their own lists, ensuring that your selections are kept private and tailored to your unique taste. You can modify your lists at any time.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## :pencil2: Planning and Progress
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Early stages Screen Shots:
+  ![ScreenShots](https://drive.google.com/file/d/15__xCUFAQx0sNt1WpLK3O6nLp8vgnakD/view?usp=drive_link) 
+  (https://drive.google.com/file/d/1hRzWEqVlVkNRL4VpkdaDp-wQi4YfDB77/view?usp=drive_link)
+- Final Stages Screenshot:
+  ![ScreenShot](https://drive.google.com/file/d/1em_r6i-GjdkBprpXgrVu7chAaClzDNR6/view?usp=drive_link)  
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## :rocket: Cool Tech Used
 
-### `npm run build`
+- PSQL
+- Javascript
+- Node
+- render.com
+- Spoonacular API
+- React.js
+- Material UI
+- CSS
+- JSON
+- Express
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## :scream: Bugs to fix
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- One of the major bugs is when the app is initialised it logs in with a user without a name or id. 
+- When the user clicks on the recipe from their list they are unable to access the information. 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+## :unamused: Lessons Learnt
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- It is important to continously bsave and push your code to github. 
+- Deploy the app as soon as it can be deployed. 
+- Plan everything in a efficent and effiective manner.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## :white_check_mark: Future Features
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Giving the users the option to categorize their lists for example, categorizing by cuisine.  
+- Give the users the option to search using different parameters. 
+- Enhancing the user interface with more interactive elements and animations.
