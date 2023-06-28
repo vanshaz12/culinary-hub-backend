@@ -14,9 +14,9 @@ app.listen(PORT, () => console.log(`Server is listening here: http://localhost:$
 
 app.use(express.json())
 
-app.get('/', (req, res) => {
-    res.send('Welcome to the server')
-})
+// app.get('/', (req, res) => {
+//     res.send('Welcome to the server')
+// })
 
 app.use(
     session({
