@@ -315,11 +315,12 @@ app.put('/api/lists/:id', async (req, res) => {
 app.delete('/api/lists/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.session.user.id;
 
-        // Perform authentication check
+        // Perform authentication and authorization check
         const deletedList = await db.query('DELETE FROM lists WHERE id = $1 AND user_id = $2 RETURNING *', [
             id,
-            req.session.user.id,
+            userId,
         ]);
 
         if (deletedList.rows.length === 0) {
@@ -332,6 +333,7 @@ app.delete('/api/lists/:id', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while deleting the list item' });
     }
 });
+
 
 
 // Add a route for adding a recipe to a list
