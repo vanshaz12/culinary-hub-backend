@@ -258,34 +258,18 @@ app.post('/api/lists', async (req, res) => {
 
 
 
-// Fetch all lists (no authentication required)
+// Fetch all lists created by the user
 app.get('/api/lists', async (req, res) => {
     try {
-        // Retrieve all lists from the database
-        const lists = await db.query('SELECT * FROM lists');
+        const userId = req.session.user.id; // Assuming the user ID is stored in the session
+
+        // Retrieve lists created by the logged-in user from the database
+        const lists = await db.query('SELECT * FROM lists WHERE user_id = $1', [userId]);
+
         res.status(200).json(lists.rows);
     } catch (error) {
         console.error('Error fetching lists:', error);
         res.status(500).json({ error: 'An error occurred while fetching the lists' });
-    }
-});
-
-// Fetch a specific list by ID (no authentication required)
-app.get('/api/lists/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        // Retrieve the list from the database based on the provided ID
-        const list = await db.query('SELECT * FROM lists WHERE id = $1', [id]);
-
-        if (list.rows.length === 0) {
-            return res.status(404).json({ error: 'List not found' });
-        }
-
-        res.status(200).json(list.rows[0]);
-    } catch (error) {
-        console.error('Error fetching list:', error);
-        res.status(500).json({ error: 'An error occurred while fetching the list' });
     }
 });
 
@@ -348,3 +332,65 @@ app.delete('/api/lists/:id', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while deleting the list item' });
     }
 });
+
+
+// Add a route for adding a recipe to a list
+app.post('/api/lists/:listId/recipes', async (req, res) => {
+    const listId = parseInt(req.params.listId);
+    const { spoonacularId, title } = req.body;
+
+    try {
+        // Check if the list exists
+        const checkListQuery = 'SELECT * FROM lists WHERE id = $1';
+        const listResult = await db.query(checkListQuery, [listId]);
+
+        if (listResult.rowCount === 0) {
+            // List not found, send a 404 response
+            return res.status(404).json({ error: 'List not found' });
+        }
+
+        // Insert the recipe title into the list_recipes table
+        const insertRecipeQuery = 'INSERT INTO list_recipes (list_id, title) VALUES ($1, $2) RETURNING *';
+        const insertedRecipe = await db.query(insertRecipeQuery, [listId, title]);
+
+        res.status(201).json(insertedRecipe.rows[0]);
+    } catch (error) {
+        console.error('Error occurred while adding the recipe to the list:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/lists/:listId/recipes', async (req, res) => {
+    const listId = parseInt(req.params.listId);
+
+    try {
+        // Retrieve the recipes associated with the list from the list_recipes table
+        const recipes = await db.query('SELECT * FROM list_recipes WHERE list_id = $1', [listId]);
+
+        res.status(200).json(recipes.rows);
+    } catch (error) {
+        console.error('Error fetching recipes:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the recipes' });
+    }
+});
+
+app.get('/api/lists/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Retrieve the list item from the database based on the provided ID
+        const list = await db.query('SELECT * FROM lists WHERE id = $1', [id]);
+
+        if (list.rowCount === 0) {
+            // List not found, send a 404 response
+            return res.status(404).json({ error: 'List not found' });
+        }
+
+        res.status(200).json(list.rows[0]);
+    } catch (error) {
+        console.error('Error fetching list item:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the list item' });
+    }
+});
+
+
