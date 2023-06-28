@@ -1,39 +1,22 @@
-CREATE DATABASE culinary_hub;
-
--- Create the "users" table to store user information
-CREATE TABLE users(
+-- Create the "users" table
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  name TEXT,
-  email TEXT,
-  password_digest TEXT
+  name VARCHAR(255),
+  email VARCHAR(255),
+  password VARCHAR(255)
 );
--- Create the "lists" table to store user-created lists
+
+-- Create the "lists" table
 CREATE TABLE lists (
   id SERIAL PRIMARY KEY,
-  user_id INT,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-
--- Create the "recipes" table to store recipe information
-CREATE TABLE recipes (
-  id SERIAL PRIMARY KEY,
-  spoonacular_id INT NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  ingredients JSONB,
-  instructions TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Create the "list_recipes" junction table to associate recipes with lists
+-- Create the "list_recipes" table
 CREATE TABLE list_recipes (
-  list_id INT NOT NULL,
-  recipe_id INT NOT NULL,
-  PRIMARY KEY (list_id, recipe_id),
-  FOREIGN KEY (list_id) REFERENCES lists (id) ON DELETE CASCADE,
-  FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
+  list_id INTEGER REFERENCES lists(id),
+  title VARCHAR(255)
 );
