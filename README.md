@@ -11,8 +11,8 @@ Culinary Hub is here to make your culinary journey exciting and effortless. With
 ## :pencil2: Planning and Progress
 
 - Early stages Screen Shots:
-  ![ScreenShots](https://drive.google.com/file/d/15__xCUFAQx0sNt1WpLK3O6nLp8vgnakD/view?usp=drive_link) 
-  (https://drive.google.com/file/d/1hRzWEqVlVkNRL4VpkdaDp-wQi4YfDB77/view?usp=drive_link)
+  ![alt text](https://drive.google.com/file/d/15__xCUFAQx0sNt1WpLK3O6nLp8vgnakD/view?usp=drive_link) 
+  ![alt text](https://drive.google.com/file/d/1hRzWEqVlVkNRL4VpkdaDp-wQi4YfDB77/view?usp=drive_link)
 - Final Stages Screenshot:
   ![ScreenShot](https://drive.google.com/file/d/1em_r6i-GjdkBprpXgrVu7chAaClzDNR6/view?usp=drive_link)  
 

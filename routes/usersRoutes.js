@@ -2,39 +2,38 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/db');
 const bcrypt = require('bcrypt');
+// const app = express()
+// app.use(express.json());
 
+// Handle user registration
 router.post('/signup', async (req, res) => {
-    // Check if the itemName is null or empty
-    if (!itemName) {
-        console.error('Item name cannot be empty');
-        return;
-    }
     try {
-        const { name, email, password } = req.body
+        const { name, email, password } = req.body;
 
         // Check if the user already exists
-        const userExists = await db.query('SELECT * FROM users WHERE email = $1', [email])
+        const userExists = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         if (userExists.rows.length > 0) {
-            return res.status(400).json({ message: 'User already exists' })
+            return res.status(400).json({ message: 'User already exists' });
         }
 
         // Hash the password
-        const saltRounds = 10
-        const passwordDigest = await bcrypt.hash(password, saltRounds)
+        const saltRounds = 10;
+        const passwordDigest = await bcrypt.hash(password, saltRounds);
 
         // Insert the user profile into the database
         const newUser = await db.query(
-            'INSERT INTO users (name, email, password_digest) VALUES ($1, $2, $3) RETURNING *',
+            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *',
             [name, email, passwordDigest]
-        )
+        );
 
-        res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] })
+        res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] });
     } catch (error) {
-        console.error('Error occurred during user registration:', error)
-        res.status(500).json({ message: 'Internal server error' })
+        console.error('Error occurred during user registration:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-})
+});
 
+// Handle user login
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -46,7 +45,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Compare the provided password with the stored password
-        const match = await bcrypt.compare(password, user.rows[0].password_digest);
+        const match = await bcrypt.compare(password, user.rows[0].password);
         if (!match) {
             return res.status(401).json({ message: 'Invalid password' });
         }
@@ -66,6 +65,8 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+// Check if the user is logged in
 router.get('/check-login', (req, res) => {
     console.log('req.session.user:', req.session.user);
     if (req.session.user) {
@@ -76,6 +77,8 @@ router.get('/check-login', (req, res) => {
         res.status(200).json({ loggedIn: false });
     }
 });
+
+// User logout
 router.get('/logout', (req, res) => {
     // Clear the session data
     req.session.destroy((err) => {
